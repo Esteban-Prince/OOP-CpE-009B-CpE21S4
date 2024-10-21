@@ -1,0 +1,53 @@
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox
+import csv
+
+class RegistrationSystem(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle('Account Registration')
+
+        self.labels = ["Username", "Password", "Email"]
+        self.entries = {}
+
+        layout = QVBoxLayout()
+
+        for label in self.labels:
+            lbl = QLabel(label)
+            entry = QLineEdit()
+            layout.addWidget(lbl)
+            layout.addWidget(entry)
+            self.entries[label] = entry
+
+        self.register_button = QPushButton('Register', self)
+        self.register_button.clicked.connect(self.register)
+        layout.addWidget(self.register_button)
+
+        self.setLayout(layout)
+
+    def register(self):
+        for label, entry in self.entries.items():
+            if not entry.text():
+                QMessageBox.critical(self, "Error", f"{label} cannot be empty!")
+                return
+
+        with open('accounts.csv', 'a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([entry.text() for entry in self.entries.values()])
+
+        QMessageBox.information(self, "Success", "Registration successful!")
+        self.clear_entries()
+
+    def clear_entries(self):
+        for entry in self.entries.values():
+            entry.clear()
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = RegistrationSystem()
+    ex.show()
+    sys.exit(app.exec_())
